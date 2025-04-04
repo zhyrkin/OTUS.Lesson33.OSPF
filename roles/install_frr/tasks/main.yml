@@ -1,0 +1,39 @@
+---
+- name: Run the equivalent of "apt-get update" as a separate step
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: install utils
+  ansible.builtin.apt:
+    name:
+      - frr
+      - frr-pythontools
+    state: present
+    update_cache: true
+
+- name: enable ospfd
+  ansible.builtin.lineinfile:
+    path: /etc/frr/daemons
+    regexp: '^ospfd='
+    line: ospfd=yes
+
+- name: enable zebra
+  ansible.builtin.lineinfile:
+    path: /etc/frr/daemons
+    regexp: '^zebra='
+    line: zebra=yes
+
+- name: create template
+  ansible.builtin.template:
+    src: frr.j2
+    dest: /etc/frr/frr.conf
+    mode: "0640"
+    group: frr
+    owner: frr
+    
+- name: restart frr
+  ansible.builtin.systemd:
+    name: frr
+    enabled: yes
+    state: restarted

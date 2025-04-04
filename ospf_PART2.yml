@@ -1,0 +1,16 @@
+- name: OSPF_part2
+  hosts: all
+  gather_facts: True
+  
+  pre_tasks:
+    - name: Rename hostanme
+      ansible.builtin.hostname:
+        name: '{{ inventory_hostname }}'
+        use: systemd
+
+  roles: 
+    - role: disable_asymetrik_route
+    - role: install_frr
+      vars:
+        router_id_enable: false  
+

@@ -1,0 +1,52 @@
+
+frr defaults traditional
+
+hostname {{ ansible_hostname }}
+log syslog informational
+no ipv6 forwarding
+service integrated-vtysh-config
+
+
+interface {{ ansible_ens19.device }}
+ ip address {{ ansible_ens19.ipv4.address }}/{{ ansible_ens19.ipv4.prefix }}
+ ip ospf mtu-ignore
+ ip ospf hello-interval 10
+ ip ospf dead-interval 30
+!
+interface {{ ansible_ens20.device }}
+ ip address {{ ansible_ens20.ipv4.address }}/{{ ansible_ens20.ipv4.prefix }}
+ ip ospf mtu-ignore
+{% if ansible_play_name != 'OSPF' %} 
+{% if ansible_hostname == 'R1' %}
+ ip ospf cost 1000
+{% else %}
+ !ip ospf cost 450
+{% endif %}{% endif %}
+{% if ansible_play_name == 'OSPF_part3' %} 
+{% if ansible_hostname == 'R3' %}
+ ip ospf cost 1000
+{% endif %}{% endif %}
+ ip ospf hello-interval 10
+ ip ospf dead-interval 30
+!
+interface {{ ansible_ens21.device }}
+ description net
+ ip address {{ ansible_ens21.ipv4.address }}/{{ ansible_ens21.ipv4.prefix }}
+ ip ospf mtu-ignore
+ !ip ospf cost 450
+ ip ospf hello-interval 10
+ ip ospf dead-interval 30 
+!
+router ospf
+ {% if router_id_enable == false %}!{% endif %}router-id {{ router_id }}
+ 
+ {% for item in announcement_networks %}
+ network {{ item }} area 0
+ {% endfor %}
+
+ {% for item in neighbor %}
+ neighbor {{ item }}
+ {% endfor %}
+
+log file /var/log/frr/frr.log
+default-information originate always

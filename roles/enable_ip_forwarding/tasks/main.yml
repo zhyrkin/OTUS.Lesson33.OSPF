@@ -1,0 +1,16 @@
+---
+- name: config net.ipv4.conf
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.forwarding
+    value: '1'
+    state: present
+    sysctl_set: true
+    reload: true
+
+- name: config net.ipv4.conf
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.rp_filter
+    value: '1'
+    state: present
+    sysctl_set: true
+    reload: true

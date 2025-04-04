@@ -1,0 +1,7 @@
+---
+- name: config net.ipv4.conf
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.rp_filter
+    value: '0'
+    state: present
+    sysctl_set: true
